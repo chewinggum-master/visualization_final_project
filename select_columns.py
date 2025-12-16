@@ -1,7 +1,11 @@
 import pandas as pd
+import os
 
 INPUT_FILE = 'Most Streamed Spotify Songs 2024.csv'
-OUTPUT_FILE = 'Most Streamed Spotify Songs 2024_selected.csv'
+OUTPUT_FILE = 'data/Most Streamed Spotify Songs 2024_selected.csv'
+
+# 確保 data 目錄存在
+os.makedirs('data', exist_ok=True)
 
 # 使用 windows-1252 編碼讀取 CSV
 print(f"正在讀取文件: {INPUT_FILE}")
