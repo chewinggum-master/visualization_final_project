@@ -7,6 +7,19 @@ let artists = [];
 let selectedArtist = null;
 let selectedPlatform = "Spotify Streams";
 let artistSortMethod = "streams";
+const METRICS = [
+    "Spotify Streams",
+    "YouTube Views",
+    "TikTok Views",
+    "Pandora Streams",
+    "Soundcloud Streams",
+    "Shazam Counts",
+];
+
+// Ranks cache: { metric: Map(key -> rank) }
+let ranksByMetric = {};
+
+const uniqueKey = d => `${d.Track}__${d.Artist}`;
 
 // Helper to parse numbers with commas
 const parseNumber = (str) => {
@@ -53,6 +66,7 @@ fetch(DATA_PATH)
     });
 
     initArtists();
+    precomputeRanks();
     renderArtistList();
     updateSongList();
 
@@ -87,6 +101,24 @@ fetch(DATA_PATH)
 }).catch(error => {
     console.error("Error loading the data:", error);
 });
+
+function precomputeRanks() {
+    ranksByMetric = {};
+    METRICS.forEach(metric => {
+        const arr = allData
+            .filter(d => d[metric] !== null && d[metric] !== undefined)
+            .slice()
+            .sort((a, b) => b[metric] - a[metric]);
+        const map = new Map();
+        arr.forEach((d, i) => {
+            const key = uniqueKey(d);
+            if (!map.has(key)) {
+                map.set(key, i + 1);
+            }
+        });
+        ranksByMetric[metric] = map;
+    });
+}
 
 function initArtists() {
     // Group by artist and calculate aggregate metrics for ALL numeric columns
@@ -248,6 +280,15 @@ function updateSongList() {
         .append("div")
         .attr("class", "song-item");
 
+    // Tooltip setup (one-time)
+    let tooltip = d3.select("body").select("#tooltip");
+    if (tooltip.empty()) {
+        tooltip = d3.select("body")
+            .append("div")
+            .attr("id", "tooltip")
+            .style("opacity", 0);
+    }
+
     // Rank (Index in the current sorted list + 1)
     rows.append("div")
         .attr("class", "song-rank")
@@ -291,5 +332,54 @@ function updateSongList() {
             // Format number with commas
             return val.toLocaleString();
         });
+
+    // Hover tooltip handlers on the entire row
+    rows.on("mouseenter", function(event, d) {
+            tooltip
+                .style("opacity", 1)
+                .html(buildTooltipHTML(d));
+        })
+        .on("mousemove", function(event) {
+            const padding = 12;
+            const node = tooltip.node();
+            const rect = node.getBoundingClientRect();
+            let x = event.pageX + padding;
+            let y = event.pageY + padding;
+            const vw = window.scrollX + window.innerWidth;
+            const vh = window.scrollY + window.innerHeight;
+            if (x + rect.width > vw) x = event.pageX - padding - rect.width;
+            if (y + rect.height > vh) y = event.pageY - padding - rect.height;
+            tooltip.style("left", x + "px").style("top", y + "px");
+        })
+        .on("mouseleave", function() {
+            tooltip.style("opacity", 0);
+        });
+}
+
+function buildTooltipHTML(d) {
+    const title = `<div class="tt-title">${escapeHtml(d.Track)}</div>`;
+    const artist = `<div class="tt-artist">${escapeHtml(d.Artist)}</div>`;
+
+    const head = `<div class="tt-head"><span>平台</span><span>排名</span><span>播放量</span></div>`;
+
+    const rows = METRICS.map(metric => {
+        const val = d[metric];
+        const rank = ranksByMetric[metric]?.get(uniqueKey(d));
+        const valText = (val === null || val === undefined) ? "no data" : val.toLocaleString();
+        const rankText = rank ? `#${rank}` : "-";
+        return `<div class="tt-row"><span class="tt-metric">${metric}</span><span class="tt-rank">${rankText}</span><span class="tt-value">${valText}</span></div>`;
+    }).join("");
+
+    return `<div class="tt-container">${title}${artist}<div class="tt-sep"></div>${head}${rows}</div>`;
+}
+
+function escapeHtml(str) {
+    if (str == null) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 

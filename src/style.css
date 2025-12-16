@@ -217,3 +217,63 @@ button#reset-filter:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: #aaa;
 }
+
+/* Tooltip */
+#tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #333;
+    line-height: 1.4;
+    z-index: 9999;
+    /* Fixed column widths for consistent alignment */
+    --metric-col: 170px;
+    --rank-col: 64px;
+    --value-col: 150px;
+}
+
+.tt-title {
+    font-weight: 700;
+    color: #222;
+}
+.tt-artist {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 6px;
+}
+.tt-sep {
+    height: 1px;
+    background: #eee;
+    margin: 6px 0;
+}
+.tt-head {
+    display: grid;
+    grid-template-columns: var(--metric-col) var(--rank-col) var(--value-col);
+    gap: 10px;
+    font-weight: 700;
+    color: #444;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #eee;
+}
+.tt-row {
+    display: grid;
+    grid-template-columns: var(--metric-col) var(--rank-col) var(--value-col);
+    gap: 10px;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid #f1f1f1;
+}
+.tt-row:nth-child(odd) { background: #fafafa; }
+.tt-metric { color: #555; }
+.tt-rank { font-weight: 600; color: #1890ff; }
+.tt-value { font-family: 'Consolas', monospace; text-align: right; }
+
+/* Vertical separators for clarity */
+.tt-head span:nth-child(1), .tt-metric { padding-right: 10px; border-right: 1px solid #eee; }
+.tt-head span:nth-child(2), .tt-rank { padding-right: 10px; border-right: 1px solid #eee; text-align: right; }
+.tt-head span:nth-child(3) { text-align: right; }
