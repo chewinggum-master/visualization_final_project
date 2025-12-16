@@ -1,7 +1,7 @@
 import pandas as pd
 
-INPUT_FILE = 'Most Streamed Spotify Songs 2024.csv'
-OUTPUT_FILE = 'Most Streamed Spotify Songs 2024_selected.csv'
+INPUT_FILE = 'data\Most Streamed Spotify Songs 2024.csv'
+OUTPUT_FILE = 'data\Most Streamed Spotify Songs 2024_selected.csv'
 
 # 使用 windows-1252 編碼讀取 CSV
 print(f"正在讀取文件: {INPUT_FILE}")
