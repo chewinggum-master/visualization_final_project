@@ -233,7 +233,7 @@ button#reset-filter:hover {
     z-index: 9999;
     /* Fixed column widths for consistent alignment */
     --metric-col: 170px;
-    --rank-col: 64px;
+    --rank-col: 100px;
     --value-col: 150px;
 }
 

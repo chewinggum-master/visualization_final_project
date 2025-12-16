@@ -18,6 +18,8 @@ const METRICS = [
 
 // Ranks cache: { metric: Map(key -> rank) }
 let ranksByMetric = {};
+// Totals cache: { metric: number of items with data }
+let totalsByMetric = {};
 
 const uniqueKey = d => `${d.Track}__${d.Artist}`;
 
@@ -104,6 +106,7 @@ fetch(DATA_PATH)
 
 function precomputeRanks() {
     ranksByMetric = {};
+    totalsByMetric = {};
     METRICS.forEach(metric => {
         const arr = allData
             .filter(d => d[metric] !== null && d[metric] !== undefined)
@@ -117,6 +120,7 @@ function precomputeRanks() {
             }
         });
         ranksByMetric[metric] = map;
+        totalsByMetric[metric] = arr.length;
     });
 }
 
@@ -365,8 +369,9 @@ function buildTooltipHTML(d) {
     const rows = METRICS.map(metric => {
         const val = d[metric];
         const rank = ranksByMetric[metric]?.get(uniqueKey(d));
+        const total = totalsByMetric[metric];
         const valText = (val === null || val === undefined) ? "no data" : val.toLocaleString();
-        const rankText = rank ? `#${rank}` : "-";
+        const rankText = rank ? `#${rank.toLocaleString()}${total ? '/' + total.toLocaleString() : ''}` : "-";
         return `<div class="tt-row"><span class="tt-metric">${metric}</span><span class="tt-rank">${rankText}</span><span class="tt-value">${valText}</span></div>`;
     }).join("");
 
