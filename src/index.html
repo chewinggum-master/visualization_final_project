@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify 2024 Streamed Songs Visualization</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Left Panel: Artist Selection -->
+        <div class="left-panel">
+            <div class="panel-header">
+                <h2>Artists</h2>
+                <p class="subtitle">Select an artist to filter songs</p>
+                <select id="artist-sort-select" style="margin-top: 10px; width: 100%; padding: 5px;">
+                    <option value="streams">Sort by: Selected Metric</option>
+                    <option value="count">Sort by: Song Count</option>
+                    <option value="alpha">Sort by: Name (A-Z)</option>
+                </select>
+                <button id="reset-filter" style="margin-top: 10px; width: 100%; padding: 5px;">Show All Artists</button>
+            </div>
+            <div id="artist-list-container">
+                <!-- Artist items will be populated here -->
+            </div>
+        </div>
+
+        <!-- Right Panel: Platform Selection and Song List -->
+        <div class="right-panel">
+            <div class="top-controls">
+                <div class="control-group">
+                    <label for="platform-select">Sort by Platform / Metric:</label>
+                    <select id="platform-select">
+                        <option value="Spotify Streams">Spotify Streams</option>
+                        <option value="YouTube Views">YouTube Views</option>
+                        <option value="TikTok Views">TikTok Views</option>
+                        <option value="Pandora Streams">Pandora Streams</option>
+                        <option value="Soundcloud Streams">Soundcloud Streams</option>
+                        <option value="Shazam Counts">Shazam Counts</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="list-header">
+                <span class="rank-col">#</span>
+                <span class="song-col">Song</span>
+                <span class="value-col">Value</span>
+            </div>
+            <div id="song-list-container">
+                <!-- Song items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="d3.js"></script>
+</body>
+</html>
