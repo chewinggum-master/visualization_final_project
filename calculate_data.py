@@ -1,7 +1,7 @@
 import pandas as pd
 
 # 讀取CSV文件（只做缺失值統計，不做刪除與輸出）
-input_file = 'Most Streamed Spotify Songs 2024_selected.csv'
+input_file = 'data\Most Streamed Spotify Songs 2024.csv'
 
 print(f"正在讀取文件: {input_file}")
 # 使用 windows-1252 編碼讀取文件
