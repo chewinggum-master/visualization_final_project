@@ -7,6 +7,8 @@ let artists = [];
 let selectedArtist = null;
 let selectedPlatform = "Spotify Streams";
 let artistSortMethod = "streams";
+let artistSearchQuery = "";
+let songSearchQuery = "";
 let currentArtistPieTotal = 0;
 let currentPlatformTotals = null;
 let currentPlatformGrandTotal = 0;
@@ -73,6 +75,11 @@ fetch(DATA_PATH)
         renderArtistList();
     });
 
+    d3.select("#artist-search").on("input", function() {
+        artistSearchQuery = this.value.toLowerCase();
+        renderArtistList();
+    });
+
     d3.select("#platform-select").on("change", function() {
         selectedPlatform = this.value;
         // Re-sort artists if the sort method is "streams" (which means "Selected Metric")
@@ -86,8 +93,17 @@ fetch(DATA_PATH)
         updateSongList();
     });
 
+    d3.select("#song-search").on("input", function() {
+        songSearchQuery = this.value.toLowerCase();
+        updateSongList();
+    });
+
     d3.select("#reset-filter").on("click", function() {
         selectedArtist = null;
+        artistSearchQuery = "";
+        songSearchQuery = "";
+        d3.select("#artist-search").property("value", "");
+        d3.select("#song-search").property("value", "");
         renderArtistList(); // Re-render to clear selection styling
         updateSongList();
         // Scroll to top
@@ -183,8 +199,14 @@ function renderArtistList() {
     const container = d3.select("#artist-list-container");
     container.html(""); // Clear existing
 
+    // Filter by search query
+    const filtered = artists.filter(d => {
+        if (d.name === "All Artists") return true;
+        return d.name.toLowerCase().includes(artistSearchQuery);
+    });
+
     const items = container.selectAll(".artist-item")
-        .data(artists)
+        .data(filtered)
         .enter()
         .append("div")
         .attr("class", "artist-item")
@@ -233,6 +255,14 @@ function updateSongList() {
     let filteredData = allData;
     if (selectedArtist) {
         filteredData = allData.filter(d => d.Artist === selectedArtist);
+    }
+
+    // Filter by search query
+    if (songSearchQuery) {
+        filteredData = filteredData.filter(d => {
+            const track = (d.Track || "").toLowerCase();
+            return track.includes(songSearchQuery);
+        });
     }
 
     // 2. Sort
@@ -300,6 +330,8 @@ function updateSongList() {
         .on("click", (event, d) => {
             event.stopPropagation();
             selectedArtist = d.Artist;
+            songSearchQuery = "";
+            d3.select("#song-search").property("value", "");
             renderArtistList();
             updateSongList();
             

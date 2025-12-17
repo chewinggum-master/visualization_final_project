@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="windows-1252">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify 2024 Streamed Songs Visualization</title>
     <link rel="stylesheet" href="style.css">
@@ -14,6 +14,7 @@
             <div class="panel-header">
                 <h2>Artists</h2>
                 <p class="subtitle">Select an artist to filter songs</p>
+                <input type="text" id="artist-search" placeholder="Search artist..." style="margin-top: 10px; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em;">
                 <select id="artist-sort-select" style="margin-top: 10px; width: 100%; padding: 5px;">
                     <option value="streams">Sort by: Selected Metric</option>
                     <option value="count">Sort by: Song Count</option>
@@ -29,8 +30,9 @@
         <!-- Middle Panel: Platform Selection and Song List -->
         <div class="middle-panel">
             <div class="top-controls">
+                <input type="text" id="song-search" placeholder="Search song..." style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; margin-right: 10px;">
                 <div class="control-group">
-                    <label for="platform-select">Sort by Platform / Metric:</label>
+                    <label for="platform-select" style="white-space: nowrap;">Sort by:</label>
                     <select id="platform-select">
                         <option value="Spotify Streams">Spotify Streams</option>
                         <option value="YouTube Views">YouTube Views</option>
