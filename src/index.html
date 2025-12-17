@@ -13,7 +13,7 @@
         <div class="left-panel">
             <div class="panel-header">
                 <h2>Artists</h2>
-                <p class="subtitle">Select an artist to filter songs</p>
+                <p class="subtitle">Press Ctrl/Command to multi-select artists for comparison</p>
                 <input type="text" id="artist-search" placeholder="Search artist..." style="margin-top: 10px; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em;">
                 <select id="artist-sort-select" style="margin-top: 10px; width: 100%; padding: 5px;">
                     <option value="streams">Sort by: Selected Metric</option>
@@ -34,12 +34,12 @@
                 <div class="control-group">
                     <label for="platform-select" style="white-space: nowrap;">Sort by:</label>
                     <select id="platform-select">
-                        <option value="Spotify Streams">Spotify Streams</option>
-                        <option value="YouTube Views">YouTube Views</option>
-                        <option value="TikTok Views">TikTok Views</option>
-                        <option value="Pandora Streams">Pandora Streams</option>
-                        <option value="Soundcloud Streams">Soundcloud Streams</option>
-                        <option value="Shazam Counts">Shazam Counts</option>
+                        <option value="Spotify">Spotify</option>
+                        <option value="YouTube">YouTube</option>
+                        <option value="TikTok">TikTok</option>
+                        <option value="Pandora">Pandora</option>
+                        <option value="Soundcloud">Soundcloud</option>
+                        <option value="Shazam">Shazam</option>
                     </select>
                 </div>
             </div>
@@ -47,7 +47,7 @@
             <div class="list-header">
                 <span class="rank-col">#</span>
                 <span class="song-col">Song</span>
-                <span class="value-col">Value</span>
+                <span class="value-col">Stream</span>
             </div>
             <div id="song-list-container">
                 <!-- Song items will be populated here -->
@@ -62,6 +62,8 @@
             <div class="chart-section bottom-chart">
                 <svg id="platform-pie" aria-label="Platform totals"></svg>
             </div>
+            <!-- Artist color legend (bottom-right) -->
+            <div id="artist-legend" class="artist-legend" aria-label="Selected artists legend"></div>
         </div>
     </div>
 

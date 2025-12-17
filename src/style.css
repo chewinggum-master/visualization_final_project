@@ -283,6 +283,7 @@ button#reset-filter:hover {
     display: flex;
     flex-direction: column;
     background: linear-gradient(180deg, #f9fbff 0%, #f4f6f9 100%);
+    position: relative; /* allow absolute legend positioning */
 }
 
 .chart-section {
@@ -301,6 +302,39 @@ button#reset-filter:hover {
 .chart-section svg {
     width: 100%;
     height: 100%;
+}
+
+/* Artist legend (bottom-right of charts panel) */
+.artist-legend {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-radius: 6px;
+    padding: 10px 12px;
+    display: none; /* hidden by default; shown when artists selected */
+    gap: 12px;
+    flex-wrap: wrap;
+    max-width: calc(100% - 20px);
+}
+
+.artist-legend.visible { display: flex; }
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #333;
+}
+
+.legend-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    border: 1px solid #ddd;
 }
 
 /* Pie slice hover states */
