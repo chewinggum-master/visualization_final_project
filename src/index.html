@@ -26,8 +26,8 @@
             </div>
         </div>
 
-        <!-- Right Panel: Platform Selection and Song List -->
-        <div class="right-panel">
+        <!-- Middle Panel: Platform Selection and Song List -->
+        <div class="middle-panel">
             <div class="top-controls">
                 <div class="control-group">
                     <label for="platform-select">Sort by Platform / Metric:</label>
@@ -49,6 +49,16 @@
             </div>
             <div id="song-list-container">
                 <!-- Song items will be populated here -->
+            </div>
+        </div>
+
+        <!-- Right Panel: Pie Charts -->
+        <div class="right-panel charts-panel">
+            <div class="chart-section top-chart">
+                <svg id="artist-pie" aria-label="Artist songs share"></svg>
+            </div>
+            <div class="chart-section bottom-chart">
+                <svg id="platform-pie" aria-label="Platform totals"></svg>
             </div>
         </div>
     </div>

@@ -7,6 +7,9 @@ let artists = [];
 let selectedArtist = null;
 let selectedPlatform = "Spotify Streams";
 let artistSortMethod = "streams";
+let currentArtistPieTotal = 0;
+let currentPlatformTotals = null;
+let currentPlatformGrandTotal = 0;
 const METRICS = [
     "Spotify Streams",
     "YouTube Views",
@@ -15,6 +18,7 @@ const METRICS = [
     "Soundcloud Streams",
     "Shazam Counts",
 ];
+const pieColor = d3.schemeTableau10;
 
 // Ranks cache: { metric: Map(key -> rank) }
 let ranksByMetric = {};
@@ -45,18 +49,8 @@ fetch(DATA_PATH)
         if (d.Artist && d.Artist.includes("ýýý")) return false;
         return true;
     }).map(d => {
-        // Convert numeric columns
-        const numericCols = [
-            "Spotify Streams", "YouTube Views", "TikTok Views", 
-            "Pandora Streams", "Soundcloud Streams", "Shazam Counts",
-            "Track Score", "Spotify Playlist Count", 
-            "Spotify Playlist Reach", "YouTube Likes", "TikTok Likes", 
-            "TikTok Posts", "YouTube Playlist Reach", "Apple Music Playlist Count", 
-            "AirPlay Spins", "SiriusXM Spins", "Deezer Playlist Count", 
-            "Deezer Playlist Reach", "Amazon Playlist Count", "Pandora Track Stations", 
-            "TIDAL Popularity"
-        ];
-        
+        // Convert numeric columns (only those used)
+        const numericCols = METRICS;
         numericCols.forEach(col => {
             if (d[col] && d[col].trim() !== "") {
                 d[col] = parseNumber(d[col]);
@@ -126,16 +120,7 @@ function precomputeRanks() {
 
 function initArtists() {
     // Group by artist and calculate aggregate metrics for ALL numeric columns
-    const numericCols = [
-        "Spotify Streams", "YouTube Views", "TikTok Views", 
-        "Pandora Streams", "Soundcloud Streams", "Shazam Counts",
-        "Track Score", "Spotify Playlist Count", 
-        "Spotify Playlist Reach", "YouTube Likes", "TikTok Likes", 
-        "TikTok Posts", "YouTube Playlist Reach", "Apple Music Playlist Count", 
-        "AirPlay Spins", "SiriusXM Spins", "Deezer Playlist Count", 
-        "Deezer Playlist Reach", "Amazon Playlist Count", "Pandora Track Stations", 
-        "TIDAL Popularity"
-    ];
+    const numericCols = METRICS;
 
     const artistMap = d3.rollup(allData, 
         v => {
@@ -265,7 +250,7 @@ function updateSongList() {
         return valB - valA;
     });
 
-    // 3. Render
+    // 3. Render list
     const container = d3.select("#song-list-container");
     container.html("");
 
@@ -339,6 +324,7 @@ function updateSongList() {
 
     // Hover tooltip handlers on the entire row
     rows.on("mouseenter", function(event, d) {
+            highlightSlices(d);
             tooltip
                 .style("opacity", 1)
                 .html(buildTooltipHTML(d));
@@ -356,8 +342,12 @@ function updateSongList() {
             tooltip.style("left", x + "px").style("top", y + "px");
         })
         .on("mouseleave", function() {
+            clearHighlights();
             tooltip.style("opacity", 0);
         });
+
+    renderArtistPieChart(filteredData);
+    renderPlatformPieChart(filteredData);
 }
 
 function buildTooltipHTML(d) {
@@ -386,5 +376,177 @@ function escapeHtml(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+function renderArtistPieChart(songs) {
+    const svg = d3.select("#artist-pie");
+    svg.selectAll("*").remove();
+    if (!selectedArtist || !songs.length) return;
+
+    const validSongs = songs.filter(d => d[selectedPlatform] && d[selectedPlatform] > 0);
+    const total = d3.sum(validSongs, d => d[selectedPlatform]);
+    currentArtistPieTotal = total;
+    if (!total) return;
+
+    const width = 320;
+    const height = 240;
+    const topMargin = 28; // Keep title clear
+    const innerHeight = height - topMargin;
+    const radius = Math.min(width, innerHeight) / 2 - 8;
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+    // Title only, no data labels on slices
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", 18)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#333")
+        .style("font-size", "14px")
+        .style("font-weight", "600")
+        .text("Artist Song Share");
+
+    const g = svg.append("g").attr("transform", `translate(${width / 2}, ${topMargin + innerHeight / 2})`);
+    const pie = d3.pie().value(d => d[selectedPlatform])(validSongs);
+    const arc = d3.arc().outerRadius(radius).innerRadius(radius * 0.45).padAngle(0.01).cornerRadius(3);
+
+    g.selectAll("path")
+        .data(pie)
+        .enter()
+        .append("path")
+        .attr("d", arc)
+        .attr("class", "pie-slice")
+        .attr("data-key", d => uniqueKey(d.data))
+        .attr("fill", (d, i) => pieColor[i % pieColor.length])
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1);
+
+    // Center label placeholder
+    svg.append("g")
+        .attr("class", "center-label")
+        .attr("transform", `translate(${width / 2}, ${topMargin + innerHeight / 2})`)
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "0.35em")
+        .style("font-size", "16px")
+        .style("font-weight", "700")
+        .style("fill", "#333")
+        .text("");
+}
+
+function renderPlatformPieChart(songs) {
+    const svg = d3.select("#platform-pie");
+    svg.selectAll("*").remove();
+    if (!selectedArtist || !songs.length) return;
+
+    const platformTotals = METRICS.map(metric => ({
+        metric,
+        value: d3.sum(songs, d => d[metric] || 0)
+    })).filter(d => d.value > 0);
+
+    if (!platformTotals.length) return;
+
+    currentPlatformTotals = platformTotals;
+    currentPlatformGrandTotal = d3.sum(platformTotals, d => d.value);
+
+    const width = 320;
+    const height = 240;
+    const topMargin = 28;
+    const bottomMargin = 10;
+    const leftMargin = 100;
+    const rightMargin = 50;
+    const innerWidth = width - leftMargin - rightMargin;
+    const innerHeight = height - topMargin - bottomMargin;
+    
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+    // Title
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", 18)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#333")
+        .style("font-size", "14px")
+        .style("font-weight", "600")
+        .text("Platform Totals");
+
+    const g = svg.append("g").attr("transform", `translate(${leftMargin}, ${topMargin})`);
+    
+    const barHeight = innerHeight / platformTotals.length;
+    const xScale = d3.scaleLinear()
+        .domain([0, currentPlatformGrandTotal])
+        .range([0, innerWidth]);
+
+    // Draw bars
+    platformTotals.forEach((d, i) => {
+        const y = i * barHeight;
+        const pct = d.value / currentPlatformGrandTotal;
+        const isSelected = d.metric === selectedPlatform;
+        
+        // Bar
+        g.append("rect")
+            .attr("x", 0)
+            .attr("y", y + barHeight * 0.1)
+            .attr("width", xScale(d.value))
+            .attr("height", barHeight * 0.8)
+            .attr("fill", isSelected ? pieColor[i % pieColor.length] : pieColor[i % pieColor.length])
+            .attr("opacity", isSelected ? 1 : 0.6)
+            .attr("stroke", isSelected ? "#000" : "#fff")
+            .attr("stroke-width", isSelected ? 2 : 1)
+            .attr("rx", 3);
+        
+        // Platform name (left)
+        g.append("text")
+            .attr("x", -8)
+            .attr("y", y + barHeight / 2)
+            .attr("text-anchor", "end")
+            .attr("dy", "0.35em")
+            .style("font-size", "11px")
+            .style("font-weight", isSelected ? "700" : "400")
+            .style("fill", "#333")
+            .text(d.metric.split(" ")[0]);
+        
+        // Percentage (on bar)
+        g.append("text")
+            .attr("x", xScale(d.value) + 5)
+            .attr("y", y + barHeight / 2)
+            .attr("text-anchor", "start")
+            .attr("dy", "0.35em")
+            .style("font-size", "11px")
+            .style("font-weight", "600")
+            .style("fill", "#333")
+            .text(d3.format(".1%")(pct));
+    });
+}
+
+function highlightSlices(song) {
+    const key = uniqueKey(song);
+
+    const artistSlices = d3.select("#artist-pie").selectAll(".pie-slice");
+    if (!artistSlices.empty()) {
+        artistSlices
+            .classed("highlight", d => uniqueKey(d.data) === key)
+            .classed("dim", d => uniqueKey(d.data) !== key);
+
+        if (currentArtistPieTotal > 0) {
+            const sliceVal = song[selectedPlatform] || 0;
+            const pct = sliceVal / currentArtistPieTotal;
+            setCenterLabel("#artist-pie", pct);
+        }
+    }
+}
+
+function clearHighlights() {
+    d3.selectAll(".pie-slice").classed("highlight", false).classed("dim", false);
+    setCenterLabel("#artist-pie", null);
+}
+
+function setCenterLabel(svgSelector, pct) {
+    const label = d3.select(svgSelector).select(".center-label text");
+    if (label.empty()) return;
+    if (pct === null || pct === undefined || isNaN(pct)) {
+        label.text("");
+    } else {
+        label.text(d3.format(".1%")((pct < 0) ? 0 : pct));
+    }
 }
 

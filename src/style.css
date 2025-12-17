@@ -15,15 +15,13 @@ body {
     display: flex;
     height: 100%;
     width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
     background-color: white;
     box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
 
 /* Left Panel */
 .left-panel {
-    width: 30%;
+    width: 28%;
     border-right: 1px solid #e0e0e0;
     display: flex;
     flex-direction: column;
@@ -80,11 +78,12 @@ body {
     border-radius: 10px;
 }
 
-/* Right Panel */
-.right-panel {
-    width: 70%;
+/* Middle Panel */
+.middle-panel {
+    width: 42%;
     display: flex;
     flex-direction: column;
+    border-right: 1px solid #e0e0e0;
 }
 
 .top-controls {
@@ -144,7 +143,7 @@ button#reset-filter:hover {
 }
 
 .value-col {
-    width: 150px;
+    width: 120px;
     text-align: right;
 }
 
@@ -193,7 +192,7 @@ button#reset-filter:hover {
 }
 
 .song-value {
-    width: 150px;
+    width: 120px;
     text-align: right;
     font-family: 'Consolas', monospace;
     font-weight: bold;
@@ -277,3 +276,45 @@ button#reset-filter:hover {
 .tt-head span:nth-child(1), .tt-metric { padding-right: 10px; border-right: 1px solid #eee; }
 .tt-head span:nth-child(2), .tt-rank { padding-right: 10px; border-right: 1px solid #eee; text-align: right; }
 .tt-head span:nth-child(3) { text-align: right; }
+
+/* Right Panel: Charts */
+.charts-panel {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #f9fbff 0%, #f4f6f9 100%);
+}
+
+.chart-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.chart-section:last-child {
+    border-bottom: none;
+}
+
+.chart-section svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Pie slice hover states */
+.pie-slice {
+    transition: opacity 0.15s ease, transform 0.15s ease, stroke-width 0.15s ease;
+}
+
+.pie-slice.highlight {
+    opacity: 1;
+    stroke: #000;
+    stroke-width: 2px;
+    transform: scale(1.02);
+}
+
+.pie-slice.dim {
+    opacity: 0.25;
+}
