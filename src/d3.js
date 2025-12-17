@@ -255,24 +255,16 @@ function renderArtistList() {
 }
 
 function updateSongList() {
-    // 1. Filter
-    let filteredData = allData;
+    // 1. Determine Base Set (Context for Ranking)
+    let baseData;
     if (selectedArtists.length > 0) {
-        filteredData = allData.filter(d => selectedArtists.includes(d.Artist));
+        baseData = allData.filter(d => selectedArtists.includes(d.Artist));
+    } else {
+        baseData = allData.slice();
     }
 
-    // Filter by search query
-    if (songSearchQuery) {
-        filteredData = filteredData.filter(d => {
-            const track = (d.Track || "").toLowerCase();
-            return track.includes(songSearchQuery);
-        });
-    }
-
-    // 2. Sort
-    // For others (Streams, Views), sort descending (higher is better).
-    
-    filteredData.sort((a, b) => {
+    // 2. Sort Base Set to establish ranking
+    baseData.sort((a, b) => {
         const valA = a[selectedPlatform];
         const valB = b[selectedPlatform];
         
@@ -284,11 +276,26 @@ function updateSongList() {
         return valB - valA;
     });
 
-    // 3. Render list
+    // 3. Assign Ranks
+    const rankMap = new Map();
+    baseData.forEach((d, i) => {
+        rankMap.set(uniqueKey(d), i + 1);
+    });
+
+    // 4. Filter by search query for Display
+    let displayData = baseData;
+    if (songSearchQuery) {
+        displayData = displayData.filter(d => {
+            const track = (d.Track || "").toLowerCase();
+            return track.includes(songSearchQuery);
+        });
+    }
+
+    // 5. Render list
     const container = d3.select("#song-list-container");
     container.html("");
 
-    if (filteredData.length === 0) {
+    if (displayData.length === 0) {
         container.append("div")
             .style("padding", "20px")
             .style("text-align", "center")
@@ -298,7 +305,7 @@ function updateSongList() {
     }
 
     const rows = container.selectAll(".song-item")
-        .data(filteredData)
+        .data(displayData)
         .enter()
         .append("div")
         .attr("class", "song-item");
@@ -312,10 +319,10 @@ function updateSongList() {
             .style("opacity", 0);
     }
 
-    // Rank (Index in the current sorted list + 1)
+    // Rank (Use the pre-calculated rank)
     rows.append("div")
         .attr("class", "song-rank")
-        .text((d, i) => i + 1);
+        .text(d => rankMap.get(uniqueKey(d)));
 
     // Info (Title + Artist)
     const infoDiv = rows.append("div")
@@ -382,9 +389,9 @@ function updateSongList() {
             tooltip.style("opacity", 0);
         });
 
-    renderArtistPieChart(filteredData);
-    renderPlatformPieChart(filteredData);
-        updateArtistLegend();
+    renderArtistPieChart(displayData);
+    renderPlatformPieChart(displayData);
+    updateArtistLegend();
 }
 
 function buildTooltipHTML(d) {
